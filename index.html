@@ -1,13 +1,125 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/chat_app.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chat app</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-area {
+            margin-top: 20px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .input-group button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .input-group button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background-color: #e0f7fa;
+        }
+
+        .message span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center text-3xl font-semibold">Real-time Chat Application</h1>
+        <div class="message-area" id="messageArea"></div>
+
+        <form class="input-group" id="form">
+            <input type="text" id="myname" placeholder="Enter your name" required>
+            <input type="text" id="message" placeholder="Type a message" required>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+
+        let form = document.getElementById('form');
+        let myname = document.getElementById('myname');
+        let message = document.getElementById('message');
+        let messageArea = document.getElementById("messageArea");
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            if (message.value && myname.value) {
+                socket.emit('send name', myname.value);
+                socket.emit('send message', message.value);
+                message.value = "";
+            }
+        });
+
+        socket.on("send name", (username) => {
+            let name = document.createElement("p");
+            name.classList.add("message");
+            name.innerHTML = `<span>${username}</span> joined the chat`;
+            messageArea.appendChild(name);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        });
+
+        socket.on("send message", (chat) => {
+            let chatContent = document.createElement("p");
+            chatContent.classList.add("message");
+            chatContent.textContent = chat;
+            messageArea.appendChild(chatContent);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        });
+    </script>
+
+</body>
 </html>
